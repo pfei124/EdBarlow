@@ -52,8 +52,8 @@ as
         /* Print Some Database Information */
         select "servername"=@@servername,
                "database"  = convert(char(20),name),
-               "data(MB)"  = str((select sum(u.size) from master..sysusages u where u.dbid=d.dbid and u.segmap in (3,7))/@numpgsmb,12,0),
-               "log(MB)"   = str((select sum(u.size) from master..sysusages u where u.dbid=d.dbid and u.segmap=4)/@numpgsmb,12,0),
+               "data(MB)"  = str((select sum(u.size) from master..sysusages u where u.dbid=d.dbid and u.segmap&7 in (3,7))/@numpgsmb,12,0),
+               "log(MB)"   = str((select sum(u.size) from master..sysusages u where u.dbid=d.dbid and u.segmap&7 = 4)/@numpgsmb,12,0),
                "owner"     = suser_name(d.suid)
         from master..sysdatabases d
         where d.name like @dbname
@@ -61,8 +61,8 @@ as
         return
      end
    select distinct name = convert(char(20),name),
-         size_data=( select sum(u.size) from master..sysusages u where u.dbid=d.dbid and u.segmap in (3,7)),
-         size_log =( select sum(u.size) from master..sysusages u where u.dbid=d.dbid and u.segmap=4 ),
+         size_data=( select sum(u.size) from master..sysusages u where u.dbid=d.dbid and u.segmap&7 in (3,7)),
+         size_log =( select sum(u.size) from master..sysusages u where u.dbid=d.dbid and u.segmap&7 = 4 ),
          owner = suser_name(d.suid),
          dbid,
          status,

@@ -74,20 +74,20 @@ print  " "
 
 set nocount on
 
-select convert(char(4), p.spid)                                       "SPID",
-       convert(char(5), p.suid)                                       "SUID",
-       convert(char(3), p.enginenum)                                  "ENG" ,
-       convert(char(10),hostprocess)                                  "HOSTPID ",
-       convert(char(14), p.hostname)                                  "HOST",
-       convert(char(12), db_name(p.dbid))                             "DATABASE",
-       convert(char(16), p.program_name)                              "PROGRAM",
-       convert(char(10),suser_name(p.suid))                           "LOGIN",
-       convert(varchar(12),p.cmd)                                     "COMMAND",
-       right("   " + convert(char(3), p.blocked),3)                   "BLK",
-       convert(char(11), p.status)                                    "STATUS",
-       convert(char(7), p.memusage)                                   "MEM    ",    /* MEMUSAGE is the amount of memory allocated to the process */
+select convert(char(4), p.spid)                        "SPID",
+       convert(char(5), p.suid)                        "SUID",
+       convert(char(3), p.enginenum)                   "ENG" ,
+       convert(char(10),hostprocess)                   "HOSTPID ",
+       convert(char(14), p.hostname)                   "HOST",
+       convert(char(12), db_name(p.dbid))              "DATABASE",
+       convert(char(16), p.program_name)               "PROGRAM",
+       convert(char(10),suser_name(p.suid))            "LOGIN",
+       convert(varchar(12),p.cmd)                      "COMMAND",
+       right("   " + convert(char(3), p.blocked),3)    "BLK",
+       convert(char(11), p.status)                     "STATUS",
+       convert(char(7), p.memusage)                    "MEM    ",    /* MEMUSAGE is the amount of memory allocated to the process */
 --   right("  " + rtrim(convert(char(5), p.memusage)), 5)          "MEM  ",    /* MEMUSAGE is the amount of memory allocated to the process */
-       right("       " + rtrim(convert(char(12), p.physical_io)), 8)  "PHYS I/O",
+       right("        " + rtrim(convert(char(12), p.physical_io)), 8)  "PHYS I/O",
        right("00" + rtrim(convert(char(2), datediff(hh, h.starttime, getdate()))), 2) + ":" +
        right("00" + rtrim(convert(char(2), datediff(mi, h.starttime, getdate()) - (datediff(hh, h.starttime, getdate())) * 60)), 2)
                                                                       "HH:MM",   /* HH:MM is the duration of an active transaction over 1 min */
@@ -107,21 +107,21 @@ select convert(char(4), p.spid)                                       "SPID",
           /* 7. All the processes accounting for more than 1000 i/o's are highlighted if they are not active already */
           substring(" BACKUP     ", 1, (1 - abs(sign(difference(p.hostname, "SYB_BACKUP") - 4))) * 11 + 1) +
           /* 8. A process having accumulated over 1000 physical i/o is considered of significance and worth bringing to the attention */
-          substring(" >i/o       ", 1, (1 - sign(20000/(p.physical_io + 1))) * (1 - sign(14/p.spid)) * 11 + 1))  "WARNINGS   "
-from   master..sysprocesses p, master..syslogshold h
+          substring(" >I/O       ", 1, (1 - sign(20000/(p.physical_io + 1))) * (1 - sign(14/p.spid)) * 11 + 1))  "WARNINGS   "
+ from  master..sysprocesses p, master..syslogshold h
 where  p.suid between @low and @high
-and    p.spid between @spidlow and @spidhigh
-and    p.spid *= h.spid
+  and  p.spid between @spidlow and @spidhigh
+  and  p.spid *= h.spid
 order by 15, p.spid
 
 /* Calculate the Processes Running and Runnable as close as possible from the display to reduce the chance of changes occurring between queries */
 
 /* Number of processes running */
 select @msg6 = rtrim(convert(char(4), count(*)))
-from   master..sysprocesses p
-where  p.suid between @low and @high
-and    substring(suser_name(p.suid), 1, 4) != "NULL"
-and    status = "running"
+  from master..sysprocesses p
+ where p.suid between @low and @high
+   and substring(suser_name(p.suid), 1, 4) != "NULL"
+   and status = "running"
 
 /* Number of processes runnable */
 select @msg7 = rtrim(convert(char(4), count(*)))
