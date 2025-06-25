@@ -1,8 +1,5 @@
--- WP
-
 use sybsystemprocs
 go
-
 
 if exists (select * from sysobjects where type = "P" and name = "sp__MEMLayout")
 begin
